@@ -20,10 +20,10 @@ N_AIR = 1.0  # Refractive index of air
 
 def simulate_laser_refraction(
     water_height=20.0,
-    num_layers=10,
+    num_layers=40,
     n_top=1.333,
     n_bottom=1.49,
-    entry_angle_deg=30.0,
+    entry_angle_deg=60.0,
     aquarium_width=30.0,
     show_plot=True,
 ):
@@ -174,9 +174,24 @@ def _plot_simulation(xs, ys, n_layers, layer_thickness,
 
     # Laser path
     ax.plot(xs, ys, color='red', linewidth=2.2, label='Laser beam', zorder=5)
+    # Mark every refraction point (interface between layers)
+    ax.scatter(xs[1:-1], ys[1:-1], color='yellow', edgecolor='darkred',
+               s=22, zorder=6, label='Refraction point')
     ax.plot(xs[0], ys[0], 'o', color='red', markersize=7, zorder=6)
     ax.annotate('Laser source', (xs[0], ys[0]),
                 xytext=(8, 8), textcoords='offset points', fontsize=9)
+
+    # Annotate the angle inside the first, middle and last layer
+    annot_idx = sorted({0, len(thetas) // 2, len(thetas) - 1})
+    for i in annot_idx:
+        seg_x = 0.5 * (xs[i + 1] + xs[i + 2])
+        seg_y = 0.5 * (ys[i + 1] + ys[i + 2])
+        ax.annotate(f"θ={np.degrees(thetas[i]):.1f}°",
+                    (seg_x, seg_y),
+                    xytext=(10, 0), textcoords='offset points',
+                    fontsize=8, color='darkred',
+                    arrowprops=dict(arrowstyle='-', color='darkred',
+                                    lw=0.6, alpha=0.6))
 
     # Normal line at entry
     normal_len = 0.15 * water_height
